@@ -2,11 +2,17 @@ require "rails-i18n"
 require "stringex_lite"
 require "to_slug_param/version"
 
-module ToSlugParam; end
+module ToSlugParam
+  class Engine < Rails::Engine; end
+end
 
 class String
   def to_slug_param opts = {}
-    self.class.to_slug_param(self, opts)
+    self.class.to_smart_slug_param(self, opts)
+  end
+
+  def to_slug_param_base opts = {}
+    self.class.to_slug_param_base(self, opts)
   end
 
   def slugged_filename opts = {}
@@ -25,7 +31,7 @@ class String
   # Self methods
   # -----------------------------------
   class << self
-    def to_slug_param str, opts = {}
+    def to_slug_param_base str, opts = {}
       sep = opts.delete(:sep) || '-'
       str = str.gsub(/\-{2,}/, '-').mb_chars
       str = I18n::transliterate(str, opts)
@@ -38,7 +44,7 @@ class String
     def to_smart_slug_param str, opts = {}
       tolerance = opts.delete(:tolerance) || 75
 
-      x = str.to_slug_param
+      x = str.to_slug_param_base
       y = str.to_url
 
       ratio = (x.size.to_f/y.size.to_f)
@@ -55,13 +61,13 @@ class String
     end
 
     def file_ext file_name, opts = {}
-      File.extname(file_name)[1..-1].to_s.to_slug_param opts
+      File.extname(file_name)[1..-1].to_s.to_slug_param_base opts
     end
 
     def file_name name, opts = {}
       name = File.basename name
       ext  = File.extname  name
-      File.basename(name, ext).to_s.to_slug_param opts
+      File.basename(name, ext).to_s.to_slug_param_base opts
     end
 
     def slugged_filename name, opts = {}
@@ -83,6 +89,10 @@ end
 class Symbol
   def to_slug_param opts = {}
     String.to_slug_param(self.to_s, opts)
+  end
+
+  def to_slug_param_base opts = {}
+    String.to_slug_param_base(self.to_s, opts)
   end
 
   def slugged_filename opts = {}
