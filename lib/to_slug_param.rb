@@ -31,6 +31,10 @@ class String
   # Self methods
   # -----------------------------------
   class << self
+    def to_slug_param str, opts = {}
+      to_smart_slug_param(str, opts)
+    end
+
     def to_slug_param_base str, opts = {}
       sep = opts.delete(:sep) || '-'
       str = str.gsub(/\-{2,}/, '-').mb_chars
